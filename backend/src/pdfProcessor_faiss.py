@@ -15,7 +15,7 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from dotenv import load_dotenv
 
 load_dotenv()
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+SEM_CHUNK_API_KEY = os.getenv("SEM_CHUNK_API_KEY")
 
 # paths
 INPUT_PDF_FOLDER = "data/input_pdf"
@@ -27,7 +27,7 @@ METADATA_FILE = os.path.join(INDEX_FOLDER, "metadata.pkl")
 # Initialize embedding model
 EMBEDDING_MODEL_NAME = "all-MiniLM-L6-v2"  # Small and fast model
 embedding_model = SentenceTransformer(EMBEDDING_MODEL_NAME)
-text_splitterSem = SemanticChunker(OpenAIEmbeddings(api_key=OPENAI_API_KEY))
+text_splitterSem = SemanticChunker(OpenAIEmbeddings(api_key=SEM_CHUNK_API_KEY))
 embed_model = FastEmbedEmbeddings(model_name="BAAI/bge-base-en-v1.5")
 text_splitterRec = RecursiveCharacterTextSplitter(
     chunk_size=1000,

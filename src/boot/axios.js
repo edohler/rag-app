@@ -23,4 +23,4 @@ export default defineBoot(({ app }) => {
 
 export { api }
 
-export const apiKey = process.env.GROQ_API_KEY
+export const apiKey = process.env.LLM_API_KEY

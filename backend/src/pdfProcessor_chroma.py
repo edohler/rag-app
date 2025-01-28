@@ -14,7 +14,7 @@ from dotenv import load_dotenv
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 load_dotenv()
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+SEM_CHUNK_API_KEY = os.getenv("SEM_CHUNK_API_KEY")
 
 # paths
 INPUT_PDF_FOLDER = "data/input_pdf"
@@ -22,7 +22,7 @@ INDEX_FOLDER = "data/indexes"
 PROCESSED_FILES_FILE = os.path.join(INDEX_FOLDER, "processed_files.pkl")
 
 # Initialize embedding model
-text_splitterSem = SemanticChunker(OpenAIEmbeddings(api_key=OPENAI_API_KEY))
+text_splitterSem = SemanticChunker(OpenAIEmbeddings(api_key=SEM_CHUNK_API_KEY))
 embed_model = FastEmbedEmbeddings(model_name="BAAI/bge-base-en-v1.5")
 text_splitterRec = RecursiveCharacterTextSplitter(
     chunk_size=500,

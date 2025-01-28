@@ -15,9 +15,9 @@ def initialize_models(index_folder="data/indexes"):
     :return: embed_model, vectorstore, bm25_retriever, llm_client
     """
     load_dotenv()
-    API_KEY = os.getenv("GROQ_API_KEY")
+    API_KEY = os.getenv("LLM_API_KEY")
     if not API_KEY:
-        raise ValueError("API key is missing! Please set GROQ_API_KEY in your environment.")
+        raise ValueError("API key is missing! Please set LLM_API_KEY in your environment.")
 
     # Initialize embedding model
     embed_model = FastEmbedEmbeddings(model_name="BAAI/bge-base-en-v1.5")

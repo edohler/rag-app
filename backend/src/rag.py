@@ -15,8 +15,8 @@ from nltk.tokenize import word_tokenize
 nltk.download('punkt_tab')
 
 # load_dotenv()
-# API_KEY = os.getenv("GROQ_API_KEY")
-API_KEY = os.environ.get("GROQ_API_KEY") # set as environment variable
+# API_KEY = os.getenv("LLM_API_KEY")
+API_KEY = os.environ.get("LLM_API_KEY") # set as environment variable
 if not API_KEY:
     raise ValueError("API key is missing! Please set API_KEY in your environment.")
 

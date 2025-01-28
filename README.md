@@ -2,52 +2,63 @@
 
 created by Erik Döhler, 28.01.2025 Bern
 
-This project implements a Retrieval-Augmented Generation (RAG) pipeline using a pre-trained LLM (Meta LLaMA) and a FAISS-based vector database for document retrieval. The system allows querying scientific papers or other documents in PDF format, returning context-aware answers and their sources.
+## **Description**
 
-## **Features**
-
-- **Document Ingestion**: Automatically processes and indexes new PDFs added to the project.
-- **Vector Database**: Uses FAISS for efficient similarity search.
-- **Question Answering**: Combines retrieved document chunks with a powerful LLM for accurate and context-aware responses.
-- **Source Tracking**: Includes the source document(s) in the response for transparency.
+A modern **Retrieval-Augmented Generation (RAG)** system with a Quasar-based frontend and Python backend. It supports semantic search, metadata filtering, and document uploads for creating a custom knowledge base. The backend integrates with vector databases (e.g., ChromaDB) and LLMs for enhanced search and response generation.
 
 ---
 
 ## **Setup**
 
-### Prerequisites
+### **Frontend**
 
-1. **Python** (>=3.8)
-2. **Git**
-3. An **API key** for the Hugging Face LLM.
+1. Navigate into the project folder:
 
-### Installation
-
-1. Clone the repository:
-
-   ```bash
-   git clone <your-repo-url>
-   cd <your-repo-folder>
-
+   ```
+   cd rag-project
    ```
 
 2. Install dependencies:
-   pip install -r requirements.txt
 
-3. Create a .env file to store your Hugging Face API key:
-   HF_API_KEY=your-hugging-face-api-key
-
-## **Usage**
-
-1. Ingest PDFs
-   To process and index PDFs either with faiss or chroma:
-   `bash
-python src\pdfProcessor_faiss.py
- `bash
-   python src\pdfProcessor_chroma.py
-
-2. Ask Questions
-   Run the query script and enter your question when prompted:
-   ```bash
-   python src\rag.py
    ```
+   npm install
+   ```
+
+3. Configure Base URL of axios in .env.developement or .env.production if necessary
+
+4. Run the development server:
+   ```
+   quasar dev
+   ```
+
+### **Backend**
+
+1. Navigate to `backend/`:
+
+   ```
+   cd rag-project/backend
+   ```
+
+2. Set up a virtual environment:
+
+   ```
+   python -m venv venv
+   venv/Scripts/activate
+   ```
+
+3. Install dependiencies:
+
+   ```
+   pip install -r requirements.txt
+   ```
+
+4. Create a .env file:
+
+   ```
+   LLM_API_KEY = your_LLM_api_key # for the LLM to generate the response
+   SEM_CHUNK_API_KEY = your_second_LLM_api_key # for the semantic chunking
+   ```
+
+## **Future Enhancements**
+
+Nearly everything, since this project is just at the beginning
