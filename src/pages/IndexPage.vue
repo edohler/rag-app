@@ -15,11 +15,11 @@
         </q-item>
 
         <q-item
-          v-for="chat in chatHistory"
+          v-for="chat in chatStore.chatHistory"
           :key="chat.id"
           clickable
           v-ripple
-          :to="`/chat/${chat.id}`"
+          @click="chatStore.fetchMessages(chat.id)"
         >
           <q-item-section avatar>
             <q-icon name="history" />
@@ -62,9 +62,20 @@
             bg-color="white"
             v-model="newQuestion"
             placeholder="Type a question"
-            @keyup.enter="sendMessage"
+            @keyup.enter="
+              chatStore.sendMessage(newQuestion)
+              newQuestion = ''
+            "
           />
-          <q-btn round flat icon="send" @click="sendMessage" />
+          <q-btn
+            round
+            flat
+            icon="send"
+            @click="
+              chatStore.sendMessage(newQuestion)
+              newQuestion = ''
+            "
+          />
         </q-toolbar>
       </div>
     </div>
@@ -72,32 +83,15 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import axios from 'axios'
+import { ref, onMounted } from 'vue'
+import { useChatStore } from '@/stores/chatStore'
 
-const showLeftSidebar = ref(true) // Only shown on this page
-const rightDrawerOpen = ref(true) // Opens dynamically
-
-const chatHistory = ref([
-  { id: '123', title: 'Chat with AI' },
-  { id: '456', title: 'RAG Test' },
-])
-const chatId = '123' // Static chat ID for now
-
+const chatStore = useChatStore()
+const showLeftSidebar = ref(true)
+const rightDrawerOpen = ref(true)
 const newQuestion = ref('')
-const messages = ref([{ sender: 'ai', text: 'Hello! How can I help?' }])
 
-const sendMessage = async () => {
-  if (!newQuestion.value.trim()) return
-
-  const res = await axios.post(`http://127.0.0.1:8000/chats/${chatId}`, {
-    sender: 'User',
-    message: newQuestion.value.trim(),
-  })
-
-  messages.value.push(res.data) // Show AI response
-  newQuestion.value = '' // Clear input
-}
+onMounted(chatStore.fetchChatHistory)
 </script>
 
 <style scoped>
