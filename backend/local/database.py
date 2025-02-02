@@ -24,7 +24,7 @@ class ChatMessage(Base):
     message = Column(Text)
     sources = Column(Text, nullable=True)  # Store multiple sources as a JSON string
     content = Column(Text, nullable=True)  # Store multiple retrieved paragraphs as JSON string
-    timestamp = Column(DateTime, default=datetime.datetime.utc)
+    timestamp = Column(DateTime, default=datetime.datetime.now())
 
 # Create tables
 Base.metadata.create_all(bind=engine)

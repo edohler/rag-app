@@ -3,8 +3,22 @@ from sqlalchemy.orm import Session
 import requests
 from database import SessionLocal, ChatMessage
 import json
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 
+class MessageRequest(BaseModel):
+    sender: str
+    message: str
+    
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allow all origins (change this in production)
+    allow_credentials=True,
+    allow_methods=["*"],  # Allow all HTTP methods
+    allow_headers=["*"],  # Allow all headers
+)
 
 REMOTE_SERVER_URL = "http://localhost:9000/"  # Change later on
 
@@ -43,15 +57,20 @@ def get_chat(chat_id: str, db: Session = Depends(get_db)):
 
 # Send message & forward to remote API
 @app.post("/chats/{chat_id}")
-def send_message(chat_id: str, sender: str, message: str, db: Session = Depends(get_db)):
+def send_message(chat_id: str, request: MessageRequest, db: Session = Depends(get_db)):
+    sender = request.sender
+    message = request.message
     # Save user message
     new_message = ChatMessage(chat_id=chat_id, sender=sender, message=message)
     db.add(new_message)
+    print("ID: " + chat_id)
+    print("sender: " + sender)
+    print("message: " + message)
 
     # Call RAG API (retrieves relevant files)
     rag_response = requests.post(f"{REMOTE_SERVER_URL}/retrieve", json={"message": message})
-    retrieved_sources = rag_response.get("sources", [])  # List of file paths
-    retrieved_content = rag_response.get("content", [])  # List of retrieved paragraphs
+    retrieved_sources = ["123", "456"] # rag_response.get("sources", [])  # List of file paths
+    retrieved_content = ["es war ein mal", "vor langer langer zeit"] # rag_response.get("content", [])  # List of retrieved paragraphs
 
     # Call LLM API (generates AI response)
     response = requests.post(f"{REMOTE_SERVER_URL}/query", json={"chat_id": chat_id, "message": message, "content": retrieved_content})

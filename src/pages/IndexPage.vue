@@ -62,20 +62,9 @@
             bg-color="white"
             v-model="newQuestion"
             placeholder="Type a question"
-            @keyup.enter="
-              chatStore.sendMessage(newQuestion)
-              newQuestion = ''
-            "
+            @keyup.enter="handleSendMessage"
           />
-          <q-btn
-            round
-            flat
-            icon="send"
-            @click="
-              chatStore.sendMessage(newQuestion)
-              newQuestion = ''
-            "
-          />
+          <q-btn round flat icon="send" @click="handleSendMessage" />
         </q-toolbar>
       </div>
     </div>
@@ -84,12 +73,18 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { useChatStore } from '@/stores/chatStore'
+import { useChatStore } from '../stores/chatStore'
 
 const chatStore = useChatStore()
 const showLeftSidebar = ref(true)
 const rightDrawerOpen = ref(true)
 const newQuestion = ref('')
+
+const handleSendMessage = () => {
+  if (!newQuestion.value.trim()) return
+  chatStore.sendMessage(newQuestion.value)
+  newQuestion.value = '' // Reset input after sending
+}
 
 onMounted(chatStore.fetchChatHistory)
 </script>

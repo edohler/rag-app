@@ -11,7 +11,7 @@
       </q-toolbar>
 
       <q-tabs align="left">
-        <q-route-tab to="/page1" label="Chat" />
+        <q-route-tab to="" label="Chat" />
         <q-route-tab to="/page2" label="Vector database" />
         <q-route-tab to="/page3" label="Help" />
       </q-tabs>
