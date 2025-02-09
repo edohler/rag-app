@@ -14,20 +14,33 @@
           </q-item-section>
         </q-item>
 
-        <q-item
-          v-for="chat in chatStore.chatHistory"
-          :key="chat.id"
-          clickable
-          v-ripple
-          @click="chatStore.fetchMessages(chat.id)"
-        >
+        <!-- New History Item -->
+        <q-item clickable v-ripple @click="toggleHistory">
           <q-item-section avatar>
             <q-icon name="history" />
           </q-item-section>
           <q-item-section>
-            <q-item-label>{{ chat.title }}</q-item-label>
+            <q-item-label>History</q-item-label>
           </q-item-section>
         </q-item>
+
+        <!-- Chat History Items -->
+        <q-list v-if="showHistory" class="history-list">
+          <q-item
+            v-for="chat in chatStore.chatHistory"
+            :key="chat.id"
+            clickable
+            v-ripple
+            @click="openChat(chat.id)"
+          >
+            <!-- <q-item-section avatar>
+              <q-icon name="chat" />
+            </q-item-section> -->
+            <q-item-section>
+              <q-item-label>{{ chat.title }}</q-item-label>
+            </q-item-section>
+          </q-item>
+        </q-list>
       </q-list>
     </div>
 
@@ -73,17 +86,30 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { useChatStore } from '../stores/chatStore'
 
+const router = useRouter()
 const chatStore = useChatStore()
 const showLeftSidebar = ref(true)
 const rightDrawerOpen = ref(true)
 const newQuestion = ref('')
+const showHistory = ref(false)
+
+const openChat = (id) => {
+  console.log('Navigating to chat:', id)
+  chatStore.chatId = id // Update store with selected chat
+  router.push(`/chat/${id}`) // Navigate to ChatPage.vue
+}
 
 const handleSendMessage = () => {
   if (!newQuestion.value.trim()) return
   chatStore.sendMessage(newQuestion.value)
   newQuestion.value = '' // Reset input after sending
+}
+
+const toggleHistory = () => {
+  showHistory.value = !showHistory.value
 }
 
 onMounted(chatStore.fetchChatHistory)
@@ -102,8 +128,8 @@ onMounted(chatStore.fetchChatHistory)
   display: flex;
   flex-direction: column;
   flex-grow: 1;
+  max-width: calc(100% - 300px);
   transition: all 0.3s ease-in-out;
-  /* flex-direction: column; */
 }
 
 .chat-wrapper {
@@ -139,5 +165,10 @@ onMounted(chatStore.fetchChatHistory)
   padding: 8px;
   display: flex;
   gap: 8px;
+}
+
+/* History List Padding */
+.history-list {
+  padding-left: 16px;
 }
 </style>

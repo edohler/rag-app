@@ -1,7 +1,7 @@
 <template>
   <div class="chat-page">
     <div class="messages">
-      <div v-for="(msg, index) in messages" :key="index" :class="msg.sender">
+      <div v-for="(msg, index) in messages" :key="index" class="message-container">
         <div
           class="message"
           :class="{ 'user-message': msg.sender === 'User', 'ai-message': msg.sender === 'AI' }"
@@ -24,13 +24,23 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { useChatStore } from '@/stores/chatStore'
+import { onMounted, computed, watch } from 'vue'
+import { useChatStore } from '../stores/chatStore'
 
 const chatStore = useChatStore()
-const messages = ref(chatStore.messages)
+const messages = computed(() => chatStore.messages)
+
+// Debug: Log messages when they update
+watch(
+  messages,
+  (newMessages) => {
+    console.log('Updated messages:', newMessages)
+  },
+  { deep: true },
+)
 
 onMounted(() => {
+  console.log('ChatPage mounted, fetching messages for chat:', chatStore.chatId)
   if (chatStore.chatId) {
     chatStore.fetchMessages(chatStore.chatId)
   }
@@ -46,27 +56,48 @@ onMounted(() => {
 }
 .messages {
   flex-grow: 1;
-  overflow-y: auto;
+  /* overflow-y: auto; */
   padding: 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Container for each message */
+.message-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column; /* Stack messages vertically */
 }
 
 /* Message Styling */
 .message {
+  display: flex;
   padding: 8px 12px;
   border-radius: 8px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  width: fit-content;
   max-width: 70%;
+  margin-bottom: 8px;
 }
 
 .user-message {
   align-self: flex-end;
   background: #007bff;
   color: white;
+  text-align: right;
+  max-width: 70%;
+  justify-content: flex-end;
 }
 
 .ai-message {
+  flex-direction: column;
   align-self: flex-start;
   background: #f1f1f1;
   color: black;
+  text-align: left;
+  max-width: 70%;
+  justify-content: flex-start;
 }
 
 /* Source Styling */

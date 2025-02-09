@@ -20,11 +20,12 @@ export const useChatStore = defineStore('chat', () => {
   const fetchMessages = async (id) => {
     chatId.value = id
     try {
+      console.log('Fetching messages for chat ID:', id) // Debug log
       const res = await axios.get(`${LOCAL_API}/chats/${id}`)
-      messages.value = res.data
+      console.log('Fetched messages:', res.data) // Debug log
+      messages.value = res.data // Ensure messages are properly updated
     } catch (error) {
       console.error('Failed to fetch messages:', error)
-
       messages.value.push({
         sender: 'System',
         text: 'Error: Could not load previous messages.',
@@ -49,7 +50,7 @@ export const useChatStore = defineStore('chat', () => {
       console.log(text.trim())
       const res = await axios.post(`${LOCAL_API}/chats/${chatId.value}`, {
         sender: 'User',
-        message: 'test', // text.trim(),
+        message: text.trim(),
       })
 
       // Extract AI response, sources & content

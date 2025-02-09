@@ -14,13 +14,13 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allow all origins (change this in production)
+    allow_origins=["*"],  # Allow all origins (change this later in production to sepicifc domains)
     allow_credentials=True,
     allow_methods=["*"],  # Allow all HTTP methods
     allow_headers=["*"],  # Allow all headers
 )
 
-REMOTE_SERVER_URL = "http://localhost:9000/"  # Change later on
+REMOTE_SERVER_URL = "http://localhost:8080"  # Change later on
 
 # Get database session
 def get_db():
@@ -68,13 +68,29 @@ def send_message(chat_id: str, request: MessageRequest, db: Session = Depends(ge
     print("message: " + message)
 
     # Call RAG API (retrieves relevant files)
-    rag_response = requests.post(f"{REMOTE_SERVER_URL}/retrieve", json={"message": message})
-    retrieved_sources = ["123", "456"] # rag_response.get("sources", [])  # List of file paths
-    retrieved_content = ["es war ein mal", "vor langer langer zeit"] # rag_response.get("content", [])  # List of retrieved paragraphs
+    try:
+        rag_response = requests.post(f"{REMOTE_SERVER_URL}/retrieve", json={"message": message})
+        rag_response.raise_for_status() 
+        rag_data = rag_response.json()  # Ensure response is valid JSON
+        retrieved_sources = rag_data.get("sources", [])
+        retrieved_content = rag_data.get("content", [])
+    except requests.exceptions.RequestException as e:
+        print(f"Error calling RAG API: {e}")
+        retrieved_sources = []
+        retrieved_content = []
 
     # Call LLM API (generates AI response)
-    response = requests.post(f"{REMOTE_SERVER_URL}/query", json={"chat_id": chat_id, "message": message, "content": retrieved_content})
-    ai_message = response.json()["response"]
+    try:
+        response = requests.post(f"{REMOTE_SERVER_URL}/query", json={"chat_id": chat_id, "message": message, "content": retrieved_content})
+        response.raise_for_status()
+        llm_data = response.json()  # Ensure response is valid JSON
+        ai_message = llm_data.get("response", "Error: No response from AI.")
+
+        if isinstance(ai_message, list):
+            ai_message = " ".join(ai_message)
+    except requests.exceptions.RequestException as e:
+        print(f"Error calling LLM API: {e}")
+        ai_message = "Error: LLM service unavailable."
 
     # Store AI response with sources
     ai_response = ChatMessage(
