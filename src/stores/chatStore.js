@@ -28,14 +28,14 @@ export const useChatStore = defineStore('chat', () => {
       console.error('Failed to fetch messages:', error)
       messages.value.push({
         sender: 'System',
-        text: 'Error: Could not load previous messages.',
+        message: 'Error: Could not load previous messages.',
       })
     }
   }
 
   // Send new message
-  const sendMessage = async (text) => {
-    if (!text.trim()) return
+  const sendMessage = async (message) => {
+    if (!message.trim()) return
 
     // If no chat ID, create a new chat
     if (!chatId.value) {
@@ -43,20 +43,20 @@ export const useChatStore = defineStore('chat', () => {
     }
 
     // Add user's message locally
-    messages.value.push({ sender: 'User', text })
+    messages.value.push({ sender: 'User', message })
 
     try {
       // Send message to local backend, which handles RAG & LLM processing
-      console.log(text.trim())
+      console.log(message.trim())
       const res = await axios.post(`${LOCAL_API}/chats/${chatId.value}`, {
         sender: 'User',
-        message: text.trim(),
+        message: message.trim(),
       })
 
       // Extract AI response, sources & content
       const aiMessage = {
         sender: 'AI',
-        text: res.data.message,
+        message: res.data.message,
         sources: res.data.sources || [], // File paths
         content: res.data.content || [], // Extracted paragraphs
       }
@@ -69,7 +69,7 @@ export const useChatStore = defineStore('chat', () => {
       // Display user-friendly error message in the chat
       messages.value.push({
         sender: 'System',
-        text: 'Error: Unable to reach the AI. Please try again later.',
+        message: 'Error: Unable to reach the AI. Please try again later.',
       })
     }
   }

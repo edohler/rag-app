@@ -6,7 +6,7 @@
           class="message"
           :class="{ 'user-message': msg.sender === 'User', 'ai-message': msg.sender === 'AI' }"
         >
-          {{ msg.text }}
+          {{ msg.message }}
 
           <!-- Display sources if AI message -->
           <div v-if="msg.sender === 'AI' && msg.sources.length" class="sources">
@@ -24,27 +24,26 @@
 </template>
 
 <script setup>
-import { onMounted, computed, watch } from 'vue'
+import { computed, watch } from 'vue'
 import { useChatStore } from '../stores/chatStore'
+import { useRoute } from 'vue-router'
 
 const chatStore = useChatStore()
 const messages = computed(() => chatStore.messages)
+const route = useRoute()
 
-// Debug: Log messages when they update
+// Watch for changes in the route ID and fetch messages accordingly
 watch(
-  messages,
-  (newMessages) => {
-    console.log('Updated messages:', newMessages)
+  () => route.params.id,
+  async (newChatId) => {
+    console.log('Route changed, fetching messages for chat:', newChatId)
+    if (newChatId) {
+      chatStore.chatId = newChatId // Update chat ID in store
+      await chatStore.fetchMessages(newChatId)
+    }
   },
-  { deep: true },
+  { immediate: true }, // This ensures it runs immediately when the component is mounted
 )
-
-onMounted(() => {
-  console.log('ChatPage mounted, fetching messages for chat:', chatStore.chatId)
-  if (chatStore.chatId) {
-    chatStore.fetchMessages(chatStore.chatId)
-  }
-})
 </script>
 
 <style scoped>

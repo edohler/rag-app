@@ -105,6 +105,7 @@ const openChat = (id) => {
 const handleSendMessage = () => {
   if (!newQuestion.value.trim()) return
   chatStore.sendMessage(newQuestion.value)
+  // console.log('Sending message:', newQuestion.value)
   newQuestion.value = '' // Reset input after sending
 }
 

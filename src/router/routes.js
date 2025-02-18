@@ -6,7 +6,7 @@ const routes = [
       {
         path: '',
         component: () => import('pages/IndexPage.vue'),
-        children: [{ path: 'chat/:sessionId?', component: () => import('pages/ChatPage.vue') }],
+        children: [{ path: 'chat/:id?', component: () => import('pages/ChatPage.vue') }],
       },
     ],
   },
