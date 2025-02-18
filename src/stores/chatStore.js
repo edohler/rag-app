@@ -74,5 +74,18 @@ export const useChatStore = defineStore('chat', () => {
     }
   }
 
-  return { chatId, messages, chatHistory, fetchChatHistory, fetchMessages, sendMessage }
+  const deleteChat = async (id) => {
+    try {
+      await axios.delete(`${LOCAL_API}/chats/${id}`)
+      chatHistory.value = chatHistory.value.filter((chat) => chat.id !== id)
+      if (chatId.value === id) {
+        chatId.value = null
+        messages.value = []
+      }
+    } catch (error) {
+      console.error('Failed to delete chat:', error)
+    }
+  }
+
+  return { chatId, messages, chatHistory, fetchChatHistory, fetchMessages, sendMessage, deleteChat }
 })

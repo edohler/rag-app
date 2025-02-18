@@ -32,12 +32,14 @@
             clickable
             v-ripple
             @click="openChat(chat.id)"
+            @mouseover="hover[chat.id] = true"
+            @mouseleave="hover[chat.id] = false"
           >
-            <!-- <q-item-section avatar>
-              <q-icon name="chat" />
-            </q-item-section> -->
             <q-item-section>
               <q-item-label>{{ chat.title }}</q-item-label>
+            </q-item-section>
+            <q-item-section side v-if="hover[chat.id]">
+              <q-icon name="delete" class="delete-icon" @click="deleteChat(chat.id)" />
             </q-item-section>
           </q-item>
         </q-list>
@@ -95,6 +97,7 @@ const showLeftSidebar = ref(true)
 const rightDrawerOpen = ref(true)
 const newQuestion = ref('')
 const showHistory = ref(false)
+const hover = ref({}) // Track hover state for each chat item
 
 const openChat = (id) => {
   console.log('Navigating to chat:', id)
@@ -111,6 +114,10 @@ const handleSendMessage = () => {
 
 const toggleHistory = () => {
   showHistory.value = !showHistory.value
+}
+
+const deleteChat = (id) => {
+  chatStore.deleteChat(id)
 }
 
 onMounted(chatStore.fetchChatHistory)
@@ -143,7 +150,8 @@ onMounted(chatStore.fetchChatHistory)
   flex-grow: 1;
   padding: 16px;
   transition: width 0.3s ease-in-out;
-  overflow: auto;
+  overflow-y: auto; /* Enable vertical scrolling */
+  max-height: calc(100vh - 66px - 98px); /* window height - message input field - nav bar */
 }
 .chat-container.half-width {
   width: 50%;
@@ -171,5 +179,15 @@ onMounted(chatStore.fetchChatHistory)
 /* History List Padding */
 .history-list {
   padding-left: 16px;
+}
+
+/* Delete Icon Styling */
+.delete-icon {
+  opacity: 0.6;
+  transition: opacity 0.3s;
+}
+
+.delete-icon:hover {
+  opacity: 1;
 }
 </style>

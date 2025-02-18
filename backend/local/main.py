@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 import requests
 from database import SessionLocal, ChatMessage
@@ -104,3 +104,13 @@ def send_message(chat_id: str, request: MessageRequest, db: Session = Depends(ge
     db.commit()
 
     return {"sender": "AI", "message": ai_message, "sources": retrieved_sources, "content": retrieved_content}
+
+@app.delete("/chats/{chat_id}")
+async def delete_chat(chat_id: str, db: Session = Depends(get_db)):
+    # print({chat_id})
+    deleted_rows = db.query(ChatMessage).filter(ChatMessage.chat_id == chat_id).delete(synchronize_session=False)
+    if deleted_rows == 0:
+        raise HTTPException(status_code=404, detail="Chat not found")
+    
+    db.commit()
+    return {"message": "Chat deleted successfully"}
