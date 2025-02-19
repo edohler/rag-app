@@ -34,12 +34,14 @@ export const useChatStore = defineStore('chat', () => {
   }
 
   // Send new message
-  const sendMessage = async (message) => {
+  const sendMessage = async (message, router) => {
     if (!message.trim()) return
 
+    let isNewChat = false
     // If no chat ID, create a new chat
     if (!chatId.value) {
       chatId.value = uuidv4()
+      isNewChat = true
     }
 
     // Add user's message locally
@@ -63,6 +65,12 @@ export const useChatStore = defineStore('chat', () => {
 
       // Store AI response locally
       messages.value.push(aiMessage)
+
+      // Fetch updated chat history and navigate to the new chat
+      await fetchChatHistory()
+      if (isNewChat && router) {
+        router.push(`/chat/${chatId.value}`)
+      }
     } catch (error) {
       console.error('API Error:', error)
 
@@ -87,5 +95,27 @@ export const useChatStore = defineStore('chat', () => {
     }
   }
 
-  return { chatId, messages, chatHistory, fetchChatHistory, fetchMessages, sendMessage, deleteChat }
+  const changeTitle = async (id, newtitle) => {
+    try {
+      await axios.put(`${LOCAL_API}/chats/${id}/${newtitle}`)
+      chatHistory.value = chatHistory.value.filter((chat) => chat.id !== id)
+      if (chatId.value === id) {
+        chatId.value = null
+        messages.value = []
+      }
+    } catch (error) {
+      console.error('Failed to update chat title:', error)
+    }
+  }
+
+  return {
+    chatId,
+    messages,
+    chatHistory,
+    fetchChatHistory,
+    fetchMessages,
+    sendMessage,
+    deleteChat,
+    changeTitle,
+  }
 })

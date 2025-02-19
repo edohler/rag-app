@@ -39,6 +39,9 @@
               <q-item-label>{{ chat.title }}</q-item-label>
             </q-item-section>
             <q-item-section side v-if="hover[chat.id]">
+              <q-icon name="edit" class="edit-icon" @click="changeTitle(chat.id)" />
+            </q-item-section>
+            <q-item-section side v-if="hover[chat.id]">
               <q-icon name="delete" class="delete-icon" @click="deleteChat(chat.id)" />
             </q-item-section>
           </q-item>
@@ -105,11 +108,12 @@ const openChat = (id) => {
   router.push(`/chat/${id}`) // Navigate to ChatPage.vue
 }
 
-const handleSendMessage = () => {
+const handleSendMessage = async () => {
   if (!newQuestion.value.trim()) return
-  chatStore.sendMessage(newQuestion.value)
-  // console.log('Sending message:', newQuestion.value)
+  await chatStore.sendMessage(newQuestion.value, router)
   newQuestion.value = '' // Reset input after sending
+  await chatStore.fetchChatHistory() // Refresh chat history
+  router.push(`/chat/${chatStore.chatId}`) // Navigate to the new chat
 }
 
 const toggleHistory = () => {
@@ -118,6 +122,13 @@ const toggleHistory = () => {
 
 const deleteChat = (id) => {
   chatStore.deleteChat(id)
+}
+
+const changeTitle = (id) => {
+  const newTitle = prompt('Enter a new title for this chat:')
+  if (newTitle) {
+    chatStore.changeTitle(id, newTitle)
+  }
 }
 
 onMounted(chatStore.fetchChatHistory)
@@ -188,6 +199,16 @@ onMounted(chatStore.fetchChatHistory)
 }
 
 .delete-icon:hover {
+  opacity: 1;
+}
+
+/* Delete Icon Styling */
+.edit-icon {
+  opacity: 0.6;
+  transition: opacity 0.3s;
+}
+
+.edit-icon:hover {
   opacity: 1;
 }
 </style>

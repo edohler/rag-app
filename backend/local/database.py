@@ -20,6 +20,7 @@ class ChatMessage(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     chat_id = Column(String, index=True)  # Unique chat session ID
+    title = Column(String)  # Chat session title
     sender = Column(String)  # "User" or "AI"
     message = Column(Text)
     sources = Column(Text, nullable=True)  # Store multiple sources as a JSON string

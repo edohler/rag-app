@@ -33,10 +33,10 @@ def get_db():
 # Get all chat sessions
 @app.get("/chats")
 def get_chats(db: Session = Depends(get_db)):
-    chats = db.query(ChatMessage.chat_id).distinct().all()
+    chats = db.query(ChatMessage.chat_id, ChatMessage.title).distinct().all()    
     
     # Convert list of tuples to structured JSON
-    chat_list = [{"id": chat.chat_id, "title": f"Chat {idx+1}"} for idx, chat in enumerate(chats)]
+    chat_list = [{"id": chat.chat_id, "title": chat.title or "Untitled Chat"} for idx, chat in enumerate(chats)]
     
     return chat_list if chat_list else []
 
@@ -46,7 +46,8 @@ def get_chat(chat_id: str, db: Session = Depends(get_db)):
     messages = db.query(ChatMessage).filter(ChatMessage.chat_id == chat_id).order_by(ChatMessage.timestamp).all()
 
     return [
-        {
+        {   
+            "title": msg.title,
             "sender": msg.sender,
             "message": msg.message,
             "sources": json.loads(msg.sources) if msg.sources else [],
@@ -60,10 +61,25 @@ def get_chat(chat_id: str, db: Session = Depends(get_db)):
 def send_message(chat_id: str, request: MessageRequest, db: Session = Depends(get_db)):
     sender = request.sender
     message = request.message
+
+    # Check if there are existing messages for the chat ID
+    existing_messages = db.query(ChatMessage).filter(ChatMessage.chat_id == chat_id).all()
+
+    if existing_messages:
+        # Use the title of the first message in the chat history
+        title = existing_messages[0].title
+    else:
+        # Set the title using the first three words of the new message
+        try:
+            title = " ".join(message.split(" ")[:3])
+        except:
+            title = message
+
     # Save user message
-    new_message = ChatMessage(chat_id=chat_id, sender=sender, message=message)
+    new_message = ChatMessage(chat_id=chat_id, title=title, sender=sender, message=message)
     db.add(new_message)
     print("ID: " + chat_id)
+    print("title: " + title)
     print("sender: " + sender)
     print("message: " + message)
 
@@ -95,6 +111,7 @@ def send_message(chat_id: str, request: MessageRequest, db: Session = Depends(ge
     # Store AI response with sources
     ai_response = ChatMessage(
         chat_id=chat_id,
+        title=title,
         sender="AI",
         message=ai_message,
         sources=json.dumps(retrieved_sources),  # Store as JSON string
@@ -114,3 +131,14 @@ async def delete_chat(chat_id: str, db: Session = Depends(get_db)):
     
     db.commit()
     return {"message": "Chat deleted successfully"}
+
+@app.put("/chats/{chat_id}/title")
+async def update_chat_title(chat_id: str, new_title: str, db: Session = Depends(get_db)):
+    chat = db.query(ChatMessage).filter(ChatMessage.chat_id == chat_id).first()
+    if not chat:
+        raise HTTPException(status_code=404, detail="Chat not found")
+
+    chat.title = new_title
+    db.commit()
+
+    return {"message": "Title updated successfully"}
