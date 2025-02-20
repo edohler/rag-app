@@ -34,6 +34,7 @@
             @click="openChat(chat.id)"
             @mouseover="hover[chat.id] = true"
             @mouseleave="hover[chat.id] = false"
+            :class="{ 'active-chat': chat.id === chatStore.chatId }"
           >
             <q-item-section>
               <q-item-label>{{ chat.title }}</q-item-label>
@@ -113,7 +114,7 @@ const handleSendMessage = async () => {
   await chatStore.sendMessage(newQuestion.value, router)
   newQuestion.value = '' // Reset input after sending
   await chatStore.fetchChatHistory() // Refresh chat history
-  router.push(`/chat/${chatStore.chatId}`) // Navigate to the new chat
+  // router.push(`/chat/${chatStore.chatId}`) // Navigate to the new chat
 }
 
 const toggleHistory = () => {
@@ -210,5 +211,11 @@ onMounted(chatStore.fetchChatHistory)
 
 .edit-icon:hover {
   opacity: 1;
+}
+
+.active-chat {
+  background-color: rgba(0, 0, 0, 0.1); /* Light highlight */
+  border-left: 4px solid var(--q-secondary); /* Primary color border */
+  transition: background 0.3s ease-in-out;
 }
 </style>

@@ -36,7 +36,6 @@ const route = useRoute()
 watch(
   () => route.params.id,
   async (newChatId) => {
-    console.log('Route changed, fetching messages for chat:', newChatId)
     if (newChatId) {
       chatStore.chatId = newChatId // Update chat ID in store
       await chatStore.fetchMessages(newChatId)

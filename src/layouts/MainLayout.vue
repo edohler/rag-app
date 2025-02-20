@@ -11,7 +11,7 @@
       </q-toolbar>
 
       <q-tabs align="left">
-        <q-route-tab to="" label="Chat" />
+        <q-route-tab to="/" label="Chat" />
         <q-route-tab to="/page2" label="Vector database" />
         <q-route-tab to="/page3" label="Help" />
       </q-tabs>
@@ -22,3 +22,22 @@
     </q-page-container>
   </q-layout>
 </template>
+
+<script setup>
+import { useRoute } from 'vue-router'
+import { watch } from 'vue'
+import { useChatStore } from 'stores/chatStore'
+
+const route = useRoute()
+const chatStore = useChatStore()
+
+watch(
+  () => route.path,
+  (newPath) => {
+    if (newPath === '/') {
+      chatStore.chatId = null // Reset chat ID when navigating to "/"
+      chatStore.messages = []
+    }
+  },
+)
+</script>

@@ -5,6 +5,7 @@ from database import SessionLocal, ChatMessage
 import json
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from sqlalchemy.sql import func
 
 class MessageRequest(BaseModel):
     sender: str
@@ -33,10 +34,23 @@ def get_db():
 # Get all chat sessions
 @app.get("/chats")
 def get_chats(db: Session = Depends(get_db)):
-    chats = db.query(ChatMessage.chat_id, ChatMessage.title).distinct().all()    
+    subquery = (
+        db.query(ChatMessage.chat_id, ChatMessage.timestamp)
+        .order_by(func.max(ChatMessage.timestamp).desc())
+        .distinct(ChatMessage.chat_id)
+        .subquery()
+    )
+    
+    chats = (
+        db.query(ChatMessage.chat_id, ChatMessage.title)
+        .join(subquery, ChatMessage.chat_id == subquery.c.chat_id)
+        .order_by(subquery.c.timestamp.desc())
+        .distinct()
+        .all()
+    )
     
     # Convert list of tuples to structured JSON
-    chat_list = [{"id": chat.chat_id, "title": chat.title or "Untitled Chat"} for idx, chat in enumerate(chats)]
+    chat_list = [{"id": chat.chat_id, "title": chat.title or "Untitled Chat"} for chat in chats]
     
     return chat_list if chat_list else []
 
@@ -78,6 +92,7 @@ def send_message(chat_id: str, request: MessageRequest, db: Session = Depends(ge
     # Save user message
     new_message = ChatMessage(chat_id=chat_id, title=title, sender=sender, message=message)
     db.add(new_message)
+    db.commit()
     print("ID: " + chat_id)
     print("title: " + title)
     print("sender: " + sender)
@@ -132,13 +147,10 @@ async def delete_chat(chat_id: str, db: Session = Depends(get_db)):
     db.commit()
     return {"message": "Chat deleted successfully"}
 
-@app.put("/chats/{chat_id}/title")
-async def update_chat_title(chat_id: str, new_title: str, db: Session = Depends(get_db)):
-    chat = db.query(ChatMessage).filter(ChatMessage.chat_id == chat_id).first()
-    if not chat:
-        raise HTTPException(status_code=404, detail="Chat not found")
-
-    chat.title = new_title
+@app.put("/chats/{chat_id}/{title}")
+async def update_chat_title(chat_id: str, title: str, db: Session = Depends(get_db)):
+    print(chat_id)
+    db.query(ChatMessage).filter(ChatMessage.chat_id == chat_id).update({"title": title})
     db.commit()
 
     return {"message": "Title updated successfully"}
