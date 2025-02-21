@@ -6,6 +6,7 @@ import json
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from sqlalchemy.sql import func
+from config import ModelConfig
 
 class MessageRequest(BaseModel):
     sender: str
@@ -21,7 +22,7 @@ app.add_middleware(
     allow_headers=["*"],  # Allow all headers
 )
 
-REMOTE_SERVER_URL = "http://localhost:8080"  # Change later on
+REMOTE_SERVER_URL = ModelConfig.server_url  # Change later on
 
 # Get database session
 def get_db():
@@ -30,6 +31,20 @@ def get_db():
         yield db
     finally:
         db.close()
+
+def get_model_config():
+    """Fetch model settings from the server."""
+    try:
+        response = requests.get(f"{REMOTE_SERVER_URL}/config/models")
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        print("Error fetching model config:", e)
+        return {}
+
+# Fetch model settings before making a request
+model_config = get_model_config()
+print("Using model:", model_config.get("llm_model"))
 
 # Get all chat sessions
 @app.get("/chats")
@@ -82,13 +97,16 @@ def send_message(chat_id: str, request: MessageRequest, db: Session = Depends(ge
     if existing_messages:
         # Use the title of the first message in the chat history
         title = existing_messages[0].title
+        chat_content = " ".join([msg.message for msg in existing_messages[-4:]]) if len(existing_messages) >= 4 else " ".join([msg.message for msg in existing_messages])
     else:
         # Set the title using the first three words of the new message
         try:
             title = " ".join(message.split(" ")[:3])
         except:
             title = message
-
+        
+        chat_content = ""    
+        
     # Save user message
     new_message = ChatMessage(chat_id=chat_id, title=title, sender=sender, message=message)
     db.add(new_message)
@@ -97,14 +115,22 @@ def send_message(chat_id: str, request: MessageRequest, db: Session = Depends(ge
     print("title: " + title)
     print("sender: " + sender)
     print("message: " + message)
+    print("chat_content: " + chat_content)
 
     # Call RAG API (retrieves relevant files)
     try:
-        rag_response = requests.post(f"{REMOTE_SERVER_URL}/retrieve", json={"message": message})
+        rag_response = requests.post(
+            f"{REMOTE_SERVER_URL}/retrieve",
+            json={
+                "message": message,
+                "content": chat_content
+            }
+        )
         rag_response.raise_for_status() 
         rag_data = rag_response.json()  # Ensure response is valid JSON
         retrieved_sources = rag_data.get("sources", [])
         retrieved_content = rag_data.get("content", [])
+        print("retrieved_sources: " + str(retrieved_sources))
     except requests.exceptions.RequestException as e:
         print(f"Error calling RAG API: {e}")
         retrieved_sources = []

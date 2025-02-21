@@ -4,7 +4,7 @@ from langchain_chroma import Chroma
 from rank_bm25 import BM25Okapi
 from nltk.tokenize import word_tokenize
 from dotenv import load_dotenv
-from retrievers import BM25Retriever
+from backend.server.retrievers import BM25Retriever
 from groq import Groq
 
 
