@@ -61,13 +61,13 @@ def retrieve_rag(data: dict):
         pass
     else:
         # Refine the question using the LLM
-        # refined_question = refine_question_with_llm(question, conversation_history, llm_model)
+        refined_question = refine_question_with_llm(question, conversation_history, llm_model)
+        print("refined question: " + refined_question)
 
         # Perform semantic search using the refined question
-        # results = semantic_search(refined_question, vectorstore, embed_model)
-        pass
+        results = semantic_search(refined_question, vectorstore, embed_model)      
 
-    return {"sources": ["123", "456"], "content": ["es war ein mal", "vor langer langer zeit"]}
+    return {"sources": [result["source"] for result in results], "content": [result["content"] for result in results]}
 
 
 @app.get("/config/models")

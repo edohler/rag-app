@@ -1,5 +1,4 @@
 import os
-import faiss
 import pickle
 import hashlib
 import numpy as np
@@ -12,18 +11,19 @@ from langchain.schema import Document
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from dotenv import load_dotenv
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from config import ServerConfig
 
 load_dotenv()
 SEM_CHUNK_API_KEY = os.getenv("SEM_CHUNK_API_KEY")
 
 # paths
-INPUT_PDF_FOLDER = "data/input_pdf"
-INDEX_FOLDER = "data/indexes"
+INPUT_PDF_FOLDER = "data/archive/"
+INDEX_FOLDER = "data/indexes/"
 PROCESSED_FILES_FILE = os.path.join(INDEX_FOLDER, "processed_files.pkl")
 
 # Initialize embedding model
 text_splitterSem = SemanticChunker(OpenAIEmbeddings(api_key=SEM_CHUNK_API_KEY))
-embed_model = FastEmbedEmbeddings(model_name="BAAI/bge-base-en-v1.5")
+embed_model = ServerConfig.embed_model
 text_splitterRec = RecursiveCharacterTextSplitter(
     chunk_size=500,
     chunk_overlap=20,

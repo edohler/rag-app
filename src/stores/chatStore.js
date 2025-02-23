@@ -58,7 +58,7 @@ export const useChatStore = defineStore('chat', () => {
 
     try {
       // Send message to local backend, which handles RAG & LLM processing
-      console.log(message.trim())
+      // console.log(message.trim())
       const res = await axios.post(`${LOCAL_API}/chats/${chatId.value}`, {
         sender: 'User',
         message: message.trim(),

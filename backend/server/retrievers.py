@@ -70,9 +70,6 @@ def refine_question_with_llm(question, conversation_history, llm_client):
     :param llm_client: The LLM client instance for generating the refined question.
     :return: Refined question as a string.
     """
-    # Select the last two exchanges (if available)
-    last_two_exchanges = conversation_history[-4:] if len(conversation_history) >= 4 else conversation_history
-
     # Prepare the LLM conversation messages
     messages = []
 
@@ -88,12 +85,10 @@ def refine_question_with_llm(question, conversation_history, llm_client):
     })
 
     # Add a clear marker for the conversation context
-    if last_two_exchanges:
-        context_content = "\n".join([f"{exchange['role']}: {exchange['content']}" for exchange in last_two_exchanges])
-        messages.append({
-            "role": "system",
-            "content": f"The following is the relevant conversation context:\n{context_content}"
-        })
+    messages.append({
+        "role": "system",
+        "content": f"The following is the relevant conversation context:\n{conversation_history}"
+    })
 
     # Add the user's question
     messages.append({"role": "user", "content": f"The following is the question you shall refine:\n{question}"})
@@ -109,7 +104,7 @@ def refine_question_with_llm(question, conversation_history, llm_client):
     refined_question = chat_completion.choices[0].message.content
     
     # Debugging: Print refined question
-    print(refined_question.strip())
+    # print(refined_question.strip())
     
     return refined_question.strip()
 
@@ -135,7 +130,8 @@ def semantic_search(question, vectorstore, embed_model, top_k=5):
     for result in search_results:
         result_embedding = embed_model.embed_query(result.page_content)
         score = cosine_similarity([query_embedding], [result_embedding])[0][0]
-        results_with_scores.append({"text": result.page_content, "source": result.metadata["source"], "score": score})
+        results_with_scores.append({"content": result.page_content, "source": result.metadata["source"], "score": score})
+        # print("source: " + result.metadata["source"])
 
     # Sort results by similarity score in descending order
     results_with_scores.sort(key=lambda x: x["score"], reverse=True)

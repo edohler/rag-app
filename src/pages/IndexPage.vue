@@ -111,8 +111,10 @@ const openChat = (id) => {
 
 const handleSendMessage = async () => {
   if (!newQuestion.value.trim()) return
-  await chatStore.sendMessage(newQuestion.value, router)
-  newQuestion.value = '' // Reset input after sending
+  const question = newQuestion.value.trim()
+  if (!question) return
+  newQuestion.value = '' // Reset input before sending
+  await chatStore.sendMessage(question, router)
   await chatStore.fetchChatHistory() // Refresh chat history
   // router.push(`/chat/${chatStore.chatId}`) // Navigate to the new chat
 }
