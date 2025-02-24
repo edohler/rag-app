@@ -1,6 +1,6 @@
 <template>
   <div class="chat-page">
-    <div class="messages">
+    <div ref="messagesContainer" class="messages">
       <div v-for="(msg, index) in messages" :key="index" class="message-container">
         <div
           class="message"
@@ -24,13 +24,33 @@
 </template>
 
 <script setup>
-import { computed, watch } from 'vue'
+import { ref, computed, watch, nextTick } from 'vue'
 import { useChatStore } from '../stores/chatStore'
 import { useRoute } from 'vue-router'
 
 const chatStore = useChatStore()
 const messages = computed(() => chatStore.messages)
 const route = useRoute()
+const messagesContainer = ref(null)
+
+// Function to scroll to the bottom
+const scrollToBottom = () => {
+  console.log('Scrolling to bottom')
+  nextTick(() => {
+    if (messagesContainer.value) {
+      messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight
+    }
+  })
+}
+
+// Watch for new messages and scroll down
+watch(
+  messages,
+  () => {
+    scrollToBottom()
+  },
+  { deep: true },
+)
 
 // Watch for changes in the route ID and fetch messages accordingly
 watch(
@@ -54,7 +74,7 @@ watch(
 }
 .messages {
   flex-grow: 1;
-  /* overflow-y: auto; */
+  overflow-y: auto;
   padding: 16px;
   display: flex;
   flex-direction: column;

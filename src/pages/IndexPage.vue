@@ -58,7 +58,7 @@
         </div>
 
         <!-- Right Sidebar -->
-        <div v-if="rightDrawerOpen" class="right-sidebar">
+        <div v-if="chatStore.shownFile" class="right-sidebar">
           <q-list>
             <q-item-label header>File Preview</q-item-label>
             <q-item>
@@ -98,7 +98,7 @@ import { useChatStore } from '../stores/chatStore'
 const router = useRouter()
 const chatStore = useChatStore()
 const showLeftSidebar = ref(true)
-const rightDrawerOpen = ref(true)
+// const rightDrawerOpen = ref(true)
 const newQuestion = ref('')
 const showHistory = ref(false)
 const hover = ref({}) // Track hover state for each chat item

@@ -9,6 +9,7 @@ export const useChatStore = defineStore('chat', () => {
   const chatId = ref(null) // Current chat ID
   const messages = ref([]) // Messages for active chat
   const chatHistory = ref([]) // List of past chats
+  const shownFile = ref(null) // Current File shown
 
   // Load chat history for sidebar
   const fetchChatHistory = async () => {
@@ -121,6 +122,7 @@ export const useChatStore = defineStore('chat', () => {
     chatId,
     messages,
     chatHistory,
+    shownFile,
     fetchChatHistory,
     fetchMessages,
     sendMessage,
