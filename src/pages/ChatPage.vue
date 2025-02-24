@@ -100,7 +100,7 @@ watch(
 
 /* Source Styling */
 .sources {
-  margin-top: 5px;
+  margin-top: 15px;
   font-size: 0.9em;
   color: gray;
 }

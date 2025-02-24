@@ -117,37 +117,26 @@ def send_message(chat_id: str, request: MessageRequest, db: Session = Depends(ge
     print("message: " + message)
     print("chat_content: " + chat_content)
 
-    # Call RAG API (retrieves relevant files)
+    # Call unified API (retrieves relevant files & generates AI response)
     try:
-        rag_response = requests.post(
-            f"{REMOTE_SERVER_URL}/retrieve",
-            json={
-                "message": message,
-                "content": chat_content
-            }
+        response = requests.post(
+            f"{REMOTE_SERVER_URL}/query",
+            json={"chat_id": chat_id, "message": message, "content": chat_content}
         )
-        rag_response.raise_for_status() 
-        rag_data = rag_response.json()  # Ensure response is valid JSON
-        retrieved_sources = rag_data.get("sources", [])
-        retrieved_content = rag_data.get("content", [])
-        print("retrieved_sources: " + str(retrieved_sources))
-    except requests.exceptions.RequestException as e:
-        print(f"Error calling RAG API: {e}")
-        retrieved_sources = []
-        retrieved_content = []
-
-    # Call LLM API (generates AI response)
-    try:
-        response = requests.post(f"{REMOTE_SERVER_URL}/query", json={"chat_id": chat_id, "message": message, "content": retrieved_content})
         response.raise_for_status()
-        llm_data = response.json()  # Ensure response is valid JSON
-        ai_message = llm_data.get("response", "Error: No response from AI.")
+        data = response.json()  # Ensure response is valid JSON
+        
+        ai_message = data.get("response", "Error: No response from AI.")
+        retrieved_sources = data.get("sources", [])
+        retrieved_content = data.get("content", [])
 
         if isinstance(ai_message, list):
             ai_message = " ".join(ai_message)
     except requests.exceptions.RequestException as e:
-        print(f"Error calling LLM API: {e}")
+        print(f"Error calling API: {e}")
         ai_message = "Error: LLM service unavailable."
+        retrieved_sources = []
+        retrieved_content = []
 
     # Store AI response with sources
     ai_response = ChatMessage(
