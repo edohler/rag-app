@@ -6,7 +6,13 @@
           class="message"
           :class="{ 'user-message': msg.sender === 'User', 'ai-message': msg.sender === 'AI' }"
         >
-          {{ msg.message }}
+          <!-- {{ msg.message }} -->
+          <div
+            v-if="msg.sender === 'AI'"
+            v-html="renderMarkdown(msg.message)"
+            class="ai-response"
+          ></div>
+          <div v-else>{{ msg.message }}</div>
 
           <!-- Display sources if AI message -->
           <div v-if="msg.sender === 'AI' && msg.sources.length" class="sources">
@@ -27,11 +33,17 @@
 import { ref, computed, watch, nextTick } from 'vue'
 import { useChatStore } from '../stores/chatStore'
 import { useRoute } from 'vue-router'
+import { marked } from 'marked'
 
 const chatStore = useChatStore()
 const messages = computed(() => chatStore.messages)
 const route = useRoute()
 const messagesContainer = ref(null)
+
+// Function to render Markdown safely
+const renderMarkdown = (text) => {
+  return marked.parse(text)
+}
 
 // Function to scroll to the bottom
 const scrollToBottom = () => {
@@ -116,6 +128,25 @@ watch(
   text-align: left;
   max-width: 70%;
   justify-content: flex-start;
+}
+
+/* Styling of markdown AI response */
+.ai-response h1 {
+  font-size: 1.2em !important; /* Smaller than default */
+  margin-bottom: 4px !important;
+  font-weight: bold !important;
+}
+
+.ai-response h2 {
+  font-size: 1.1em !important;
+  margin-bottom: 4px !important;
+  font-weight: bold !important;
+}
+
+.ai-response h3 {
+  font-size: 1em !important;
+  margin-bottom: 2px !important;
+  font-weight: bold !important;
 }
 
 /* Source Styling */

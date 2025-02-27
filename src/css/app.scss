@@ -1,1 +1,21 @@
 // app global css in SCSS form
+.ai-response h1 {
+  font-size: 1.3em !important; /* Smaller than default */
+  margin-bottom: 4px !important;
+  font-weight: bold !important;
+  line-height: 1.5 !important;
+}
+
+.ai-response h2 {
+  font-size: 1.1em !important;
+  margin-bottom: 4px !important;
+  font-weight: bold !important;
+  line-height: 1.3 !important;
+}
+
+.ai-response h3 {
+  font-size: 1em !important;
+  margin-bottom: 2px !important;
+  font-weight: bold !important;
+  line-height: 1.3 !important;
+}

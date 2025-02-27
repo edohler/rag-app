@@ -57,15 +57,18 @@ def query_llm(data: dict):
     # Generate response with llm on question and additional content
     # Detect the language of the question
     question_language = detect(question)
+    print("Question language:", question_language)
 
     # System prompt to instruct the LLM
     system_prompt = (
         f"You are an AI assistant that answers questions based on the provided context. "
         f"Respond in the same language as the user's question ({question_language}). "
         f"Your primary objective is to provide accurate answers using only the additional context. If the context does not fully address the question, politely inform the user and suggest rephrasing if necessary. Avoid using external knowledge or assumptions. "
-        f"Here is the additional context, to help you answering the user question: {content}"
-        f"Ensure that your response aligns with any previous messages in the conversation, if relevant. Chat history: {conversation_history}"
-        f"If the context contains multiple sources, summarize key points concisely before answering."
+        f"Here is the additional context, to help you answering the user question: {content} "
+        f"Ensure that your response aligns with any previous messages in the conversation, if relevant. Chat history: {conversation_history} "
+        f"If the context contains multiple sources, summarize key points concisely before answering. "
+        f"Respond in well-structured Markdown. Format headings, lists, and code blocks appropriately. "
+        f"Use bullet points for lists and bold or italics for emphasis."
     )
     # ---> Idea to use a parser or something like this to print llm response nicely
 
