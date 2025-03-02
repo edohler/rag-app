@@ -19,11 +19,17 @@
             <strong>Sources:</strong>
             <ul>
               <li v-for="(source, i) in msg.sources" :key="i">
-                <a :href="'file://' + source" target="_blank">{{ source }}</a>
+                <a href="#" @click="openPdf(source, msg.content[i])">{{ source }}</a>
               </li>
             </ul>
           </div>
         </div>
+      </div>
+    </div>
+    <!-- Right Sidebar -->
+    <div v-if="selectedPdf" class="right-sidebar">
+      <div class="pdfviewer-container">
+        <PdfViewer :pdfPath="selectedPdf" :searchText="searchText" />
       </div>
     </div>
   </div>
@@ -34,11 +40,24 @@ import { ref, computed, watch, nextTick } from 'vue'
 import { useChatStore } from '../stores/chatStore'
 import { useRoute } from 'vue-router'
 import { marked } from 'marked'
+import PdfViewer from './PdfViewer.vue'
 
 const chatStore = useChatStore()
 const messages = computed(() => chatStore.messages)
 const route = useRoute()
 const messagesContainer = ref(null)
+
+const selectedPdf = ref(null)
+const searchText = ref('')
+
+const openPdf = (filePath, content) => {
+  selectedPdf.value = filePath
+  // Extract the first few words from the matched content for searching
+  if (content) {
+    const words = content.split(' ')
+    searchText.value = words.slice(0, 4).join(' ') // Take the first 4 words
+  }
+}
 
 // Function to render Markdown safely
 const renderMarkdown = (text) => {
@@ -167,5 +186,17 @@ watch(
 
 .sources a:hover {
   text-decoration: underline;
+}
+
+/* Right Sidebar (Takes 50% when visible) */
+.right-sidebar {
+  width: 50%;
+  background: #f5f5f5;
+  padding: 16px;
+}
+
+.pdfviewer-container {
+  flex: 1;
+  border-left: 2px solid #ccc;
 }
 </style>

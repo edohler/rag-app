@@ -56,18 +56,6 @@
         <div class="chat-container">
           <router-view />
         </div>
-
-        <!-- Right Sidebar -->
-        <div v-if="chatStore.shownFile" class="right-sidebar">
-          <q-list>
-            <q-item-label header>File Preview</q-item-label>
-            <q-item>
-              <q-item-section>
-                <q-item-label>No file selected yet</q-item-label>
-              </q-item-section>
-            </q-item>
-          </q-list>
-        </div>
       </div>
 
       <div class="chat-footer">
@@ -169,13 +157,6 @@ onMounted(chatStore.fetchChatHistory)
 }
 .chat-container.half-width {
   width: 50%;
-}
-
-/* Right Sidebar (Takes 50% when visible) */
-.right-sidebar {
-  width: 50%;
-  background: #f5f5f5;
-  padding: 16px;
 }
 
 /* Footer Styling */
